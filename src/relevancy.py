@@ -83,9 +83,26 @@ def find_word_in_string(w, s):
 
 
 def process_subject_fields(subjects):
+    # Split the subjects by semicolon
     all_subjects = subjects.split(";")
-    all_subjects = [s.split(" (")[0] for s in all_subjects]
+    # Clean up each subject: remove unwanted text and trim whitespace
+    all_subjects = [s.split(" (")[0].strip() for s in all_subjects]
+    print("Returning all subjects...")
+    print(all_subjects)
     return all_subjects
+
+import logging
+import time
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
+from tqdm import tqdm
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler()]
+)
 
 def generate_relevance_score(
     all_papers,
@@ -95,47 +112,79 @@ def generate_relevance_score(
     num_paper_in_prompt=4,
     temperature=0.4,
     top_p=1.0,
-    sorting=True
+    sorting=True,
+    max_retries=3,
+    retry_delay=2
 ):
-    print("Generating relevance score...")
+    logging.info("Starting relevance score generation...")
     ans_data = []
     request_idx = 1
     hallucination = False
-    print(f"Papers:  {all_papers}")
-    for id in tqdm.tqdm(range(0, len(all_papers), num_paper_in_prompt)):
-        prompt_papers = all_papers[id:id+num_paper_in_prompt]
-        # only sampling from the seed tasks
+    total_papers = len(all_papers)
+
+    logging.info(f"Total papers to process: {total_papers}")
+
+    for idx in tqdm(range(0, total_papers, num_paper_in_prompt), desc="Processing papers"):
+        prompt_papers = all_papers[idx:idx+num_paper_in_prompt]
         prompt = encode_prompt(query, prompt_papers)
 
         decoding_args = utils.OpenAIDecodingArguments(
             temperature=temperature,
             n=1,
-            max_tokens=128*num_paper_in_prompt, # The response for each paper should be less than 128 tokens. 
+            max_tokens=128*num_paper_in_prompt,
             top_p=top_p,
         )
-        request_start = time.time()
-        print("Sending request to OpenAI:")
-        print(prompt)
-        response = utils.openai_completion(
-            prompts=prompt,
-            model_name=model_name,
-            batch_size=1,
-            decoding_args=decoding_args,
-            logit_bias={"100257": -100},  # prevent the <|endoftext|> from being generated
-        )
-        print ("response", response['message']['content'])
-        request_duration = time.time() - request_start
 
-        process_start = time.time()
-        batch_data, hallu = post_process_chat_gpt_response(prompt_papers, response, threshold_score=threshold_score)
-        hallucination = hallucination or hallu
-        ans_data.extend(batch_data)
+        # Retry logic for API calls
+        for attempt in range(max_retries):
+            try:
+                request_start = time.time()
+                logging.info(f"Sending request {request_idx} to OpenAI (Attempt {attempt+1}/{max_retries})...")
+                
+                response = utils.openai_completion(
+                    prompts=prompt,
+                    model_name=model_name,
+                    batch_size=1,
+                    decoding_args=decoding_args,
+                    logit_bias={"100257": -100},
+                )
+                
+                request_duration = time.time() - request_start
+                logging.info(f"Request {request_idx} completed in {request_duration:.2f}s")
+                break  # Exit retry loop if successful
 
-        print(f"Request {request_idx+1} took {request_duration:.2f}s")
-        print(f"Post-processing took {time.time() - process_start:.2f}s")
+            except Exception as e:
+                logging.error(f"Error during API call: {e}")
+                if attempt < max_retries - 1:
+                    logging.info(f"Retrying in {retry_delay}s...")
+                    time.sleep(retry_delay)
+                else:
+                    logging.error(f"Max retries reached for request {request_idx}. Skipping.")
+                    response = None
+        
+        if not response:
+            continue  # Skip post-processing if no response
 
+        # Post-processing
+        try:
+            process_start = time.time()
+            batch_data, hallu = post_process_chat_gpt_response(prompt_papers, response, threshold_score=threshold_score)
+            hallucination = hallucination or hallu
+            ans_data.extend(batch_data)
+            process_duration = time.time() - process_start
+            logging.info(f"Post-processing for request {request_idx} took {process_duration:.2f}s")
+        except Exception as e:
+            logging.error(f"Error during post-processing: {e}")
+
+        request_idx += 1
+
+    # Sorting the results
     if sorting:
+        logging.info("Sorting results by relevancy score...")
         ans_data = sorted(ans_data, key=lambda x: int(x["Relevancy score"]), reverse=True)
+    
+    total_duration = sum(d.get("duration", 0) for d in ans_data)
+    logging.info(f"Finished processing {total_papers} papers in {total_duration:.2f}s")
     
     return ans_data, hallucination
 
