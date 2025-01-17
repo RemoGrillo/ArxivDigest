@@ -3,13 +3,13 @@ topic: "Computer Science"
 # An empty list here will include all categories in a topic
 # Use the natural language names of the topics, found here: https://arxiv.org
 # Including more categories will result in more calls to the large language model
-categories: ["Artificial Intelligence", "Computation and Language", "Machine Learning"]
+categories: ["Artificial Intelligence", "Computation and Language", "Machine Learning", "Information Retrieval", "Logic in Computer Science", "Multiagent Systems", "Data Structures and Algorithms", "Databases", "Digital Libraries"]
 
 # Relevance score threshold. abstracts that receive a score less than this from the large language model
 # will have their papers filtered out.
 #
 # Must be within 1-10
-threshold: 3
+threshold: 8
 
 # A natural language statement that the large language model will use to judge which papers are relevant 
 #
@@ -21,9 +21,7 @@ threshold: 3
 # This can be empty, which just return a full list of papers with no judgement or filtering,
 # in whatever order arXiv responds with.
 interest: |
-  1. Interested in LLMs and Knowledge Graphs integration
-  2. Text to Query (SPARQL)
-  3. Hybrid AI
-  4. Triples to Natural Language
-  5. RAG is interesting only if applied so Knowledge Graphs and RDF Triples
-  6. Not interested in paper focus on specific languages, e.g., Arabic, Chinese, etc.
+  Interested in Large Language Models (LLMs) and Knowledge Graphs (KG) especially in combination
+  Text to Query, Natural language to query, especially SPARQL
+  Explanatory AI and Hybrid AI
+  RDF and LLMs

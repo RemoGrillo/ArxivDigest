@@ -342,5 +342,3 @@ if __name__ == "__main__":
         print(f"An error occurred while sending email: {str(e)}")
         # Raise the exception to fail the GitHub Actions job
         raise
-    else:
-        print("No sendgrid api key found. Skipping email")
