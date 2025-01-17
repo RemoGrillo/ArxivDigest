@@ -51,6 +51,7 @@ def _download_new_papers(field_abbr):
 
 
 def get_papers(field_abbr, limit=None):
+    print("Getting papers...")
     date = datetime.date.fromtimestamp(datetime.datetime.now(tz=pytz.timezone("America/New_York")).timestamp())
     date = date.strftime("%a, %d %b %y")
     if not os.path.exists(f"./data/{field_abbr}_{date}.jsonl"):
@@ -61,4 +62,5 @@ def get_papers(field_abbr, limit=None):
             if limit and i == limit:
                 return results
             results.append(json.loads(line))
+    print(results)
     return results
