@@ -222,6 +222,7 @@ category_map = {
 
 
 def generate_body(topic, categories, interest, threshold):
+    print(f'Generating body with topic {topic} and categories {categories} and interest {interest}, threshold: {threshold}')
     if topic == "Physics":
         raise RuntimeError("You must choose a physics subtopic.")
     elif topic in physics_topics:
@@ -297,6 +298,8 @@ if __name__ == "__main__":
         print(body)
         f.write(body)
     if os.environ.get("SENDGRID_API_KEY", None):
+        print("Using from email:")
+        print(from_email)
         sg = SendGridAPIClient(api_key=os.environ.get("SENDGRID_API_KEY"))
         from_email = Email(from_email)  # Change to your verified sender
         to_email = To(to_email)
