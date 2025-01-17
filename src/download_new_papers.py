@@ -10,16 +10,21 @@ import pytz
 
 def _download_new_papers(field_abbr):
     NEW_SUB_URL = f'https://arxiv.org/list/{field_abbr}/new'  # https://arxiv.org/list/cs/new
+    print(f"Opening page with url: {NEW_SUB_URL}")
     page = urllib.request.urlopen(NEW_SUB_URL)
     soup = bs(page)
     content = soup.body.find("div", {'id': 'content'})
 
     # find the first h3 element in content
     h3 = content.find("h3").text   # e.g: New submissions for Wed, 10 May 23
-    date = h3.replace("New submissions for", "").strip()
+    date = h3.replace("Showing new listings for", "").strip()
+    print(f"Date found after strip: {date}")
 
     dt_list = content.dl.find_all("dt")
     dd_list = content.dl.find_all("dd")
+    print(f"DD List {dd_list}")
+    print(f"DT List {dt_list}")
+
     arxiv_base = "https://arxiv.org/abs/"
 
     assert len(dt_list) == len(dd_list)
@@ -35,6 +40,7 @@ def _download_new_papers(field_abbr):
                             .replace("Authors:\n", "").replace("\n", "").strip()
         paper['subjects'] = dd_list[i].find("div", {"class": "list-subjects"}).text.replace("Subjects: ", "").strip()
         paper['abstract'] = dd_list[i].find("p", {"class": "mathjax"}).text.replace("\n", " ").strip()
+        print(f"Appending new paper {paper}")
         new_paper_list.append(paper)
 
 
@@ -62,5 +68,5 @@ def get_papers(field_abbr, limit=None):
             if limit and i == limit:
                 return results
             results.append(json.loads(line))
-    print(results)
+    print(f"Paper results:{results}")
     return results
