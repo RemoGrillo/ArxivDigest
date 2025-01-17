@@ -21,7 +21,8 @@ threshold: 8
 # This can be empty, which just return a full list of papers with no judgement or filtering,
 # in whatever order arXiv responds with.
 interest: |
-  Interested in Large Language Models (LLMs) and Knowledge Graphs (KG) especially in combination
+  Knowledge Graphs and LLMs.
+  Interested in Large Language Models (LLMs) and Knowledge Graphs (KG), especially in combination.
   Text to Query, Natural language to query, especially SPARQL
-  Explanatory AI and Hybrid AI
+  Explanatory AI and Hybrid AI (only if in relation to Knowledge Graphs or symbolic reasoning (gofai))
   RDF and LLMs
