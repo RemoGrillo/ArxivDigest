@@ -299,22 +299,37 @@ if __name__ == "__main__":
         print("Writing body:")
         print(body)
         f.write(body)
-    if os.environ.get("SENDGRID_API_KEY", None):
-        print("Using from email:")
-        print(from_email)
-        sg = SendGridAPIClient(api_key=os.environ.get("SENDGRID_API_KEY"))
-        from_email = Email(from_email)  # Change to your verified sender
-        to_email = To(to_email)
-        subject = date.today().strftime("Personalized arXiv Digest, %d %b %Y")
-        content = Content("text/html", body)
-        mail = Mail(from_email, to_email, subject, content)
-        mail_json = mail.get()
+    api_key = os.environ.get("SENDGRID_API_KEY")
+    if not api_key:
+        raise RuntimeError("Error: SENDGRID_API_KEY is not set in the environment variables.")
 
-        # Send an HTTP POST request to /mail/send
-        response = sg.client.mail.send.post(request_body=mail_json)
-        if response.status_code >= 200 and response.status_code <= 300:
+    print("Using from email:")
+    print(from_email)
+
+    try:
+        # Create the Mail object
+        subject = date.today().strftime("Personalized arXiv Digest, %d %b %Y")
+        message = Mail(
+            from_email=from_email,  # Directly pass email as string
+            to_emails=to_email,     # Directly pass email as string
+            subject=subject,
+            html_content=body       # HTML content of the email
+        )
+
+        # Send the email
+        sg = SendGridAPIClient(api_key)
+        response = sg.send(message)
+
+        # Log the response
+        if 200 <= response.status_code < 300:
             print("Send test email: Success!")
         else:
-            print("Send test email: Failure ({response.status_code}, {response.text})")
+            print(f"Send test email: Failure ({response.status_code}, {response.body})")
+
+        # Print additional response info (useful for debugging)
+        print(f"Response Headers: {response.headers}")
+    
+    except Exception as e:
+        print(f"An error occurred while sending email: {str(e)}")
     else:
         print("No sendgrid api key found. Skipping email")
