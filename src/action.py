@@ -223,6 +223,8 @@ category_map = {
 
 def generate_body(topic, categories, interest, threshold):
     print(f'Generating body with topic {topic} and categories {categories} and interest {interest}, threshold: {threshold}')
+    
+    # Validate topic
     if topic == "Physics":
         raise RuntimeError("You must choose a physics subtopic.")
     elif topic in physics_topics:
@@ -231,6 +233,8 @@ def generate_body(topic, categories, interest, threshold):
         abbr = topics[topic]
     else:
         raise RuntimeError(f"Invalid topic {topic}")
+    
+    # Validate categories
     if categories:
         for category in categories:
             if category not in category_map[topic]:
@@ -243,6 +247,8 @@ def generate_body(topic, categories, interest, threshold):
         ]
     else:
         papers = get_papers(abbr)
+    
+    # If there's an interest, generate relevancy scores
     if interest:
         print(f"Papers: {papers}")
         print(f"Interest: {interest}")
@@ -252,24 +258,69 @@ def generate_body(topic, categories, interest, threshold):
             threshold_score=threshold,
             num_paper_in_prompt=16,
         )
-        body = "<br><br>".join(
-            [
-                f'Title: <a href="{paper["main_page"]}">{paper["title"]}</a><br>Authors: {paper["authors"]}<br>Score: {paper["Relevancy score"]}<br>Reason: {paper["Reasons for match"]}'
-                for paper in relevancy
-            ]
-        )
+        
+        # Build the HTML body for relevant papers
+        body_content = [
+            f"""
+            <div style="margin-bottom: 1em;">
+                <span style="color: #007BFF; font-weight: bold;">Title:</span>
+                <a style="color: #007BFF; text-decoration: none;" href="{paper['main_page']}">
+                    {paper['title']}
+                </a><br>
+                
+                <span style="color: #28A745; font-weight: bold;">Authors:</span>
+                {paper['authors']}<br>
+                
+                <span style="color: #FFC107; font-weight: bold;">Score:</span>
+                {paper['Relevancy score']}<br>
+                
+                <span style="color: #17A2B8; font-weight: bold;">Reason:</span>
+                {paper['Reasons for match']}
+            </div>
+            """
+            for paper in relevancy
+        ]
+        
+        # If there are hallucinations, prepend a warning
         if hallucination:
+            warning_message = """
+            <div style="color: red; font-weight: bold; margin-bottom: 1em;">
+                Warning: the model hallucinated some papers. We have tried to remove them, 
+                but the scores may not be accurate.
+            </div>
+            """
             body = (
-                "Warning: the model hallucinated some papers. We have tried to remove them, but the scores may not be accurate.<br><br>"
-                + body
+                f"<div style='font-family: Arial; color: #333; line-height: 1.5;'>"
+                f"{warning_message}"
+                f"{'<br>'.join(body_content)}</div>"
             )
+        else:
+            body = (
+                f"<div style='font-family: Arial; color: #333; line-height: 1.5;'>"
+                f"{'<br>'.join(body_content)}</div>"
+            )
+
     else:
-        body = "<br><br>".join(
-            [
-                f'Title: <a href="{paper["main_page"]}">{paper["title"]}</a><br>Authors: {paper["authors"]}'
-                for paper in papers
-            ]
+        # Build the HTML body without interest (no score or reason)
+        body_content = [
+            f"""
+            <div style="margin-bottom: 1em;">
+                <span style="color: #007BFF; font-weight: bold;">Title:</span>
+                <a style="color: #007BFF; text-decoration: none;" href="{paper['main_page']}">
+                    {paper['title']}
+                </a><br>
+                
+                <span style="color: #28A745; font-weight: bold;">Authors:</span>
+                {paper['authors']}
+            </div>
+            """
+            for paper in papers
+        ]
+        body = (
+            f"<div style='font-family: Arial; color: #333; line-height: 1.5;'>"
+            f"{'<br>'.join(body_content)}</div>"
         )
+    
     return body
 
 
