@@ -301,35 +301,46 @@ if __name__ == "__main__":
         f.write(body)
     api_key = os.environ.get("SENDGRID_API_KEY")
     if not api_key:
-        raise RuntimeError("Error: SENDGRID_API_KEY is not set in the environment variables.")
+        print("Error: SENDGRID_API_KEY is not set in the environment variables.")
+        # Raise an exception so GitHub Actions can fail
+        raise RuntimeError("Missing SendGrid API Key.")
 
-    print("Using from email:")
-    print(from_email)
-
+    print("Using from email:", from_email)
+    
     try:
         # Create the Mail object
         subject = date.today().strftime("Personalized arXiv Digest, %d %b %Y")
         message = Mail(
-            from_email=from_email,  # Directly pass email as string
-            to_emails=to_email,     # Directly pass email as string
+            from_email=from_email,  # Must be verified in SendGrid
+            to_emails=to_email,
             subject=subject,
-            html_content=body       # HTML content of the email
+            html_content=body
         )
 
         # Send the email
         sg = SendGridAPIClient(api_key)
         response = sg.send(message)
 
-        # Log the response
+        # Check the response status
         if 200 <= response.status_code < 300:
             print("Send test email: Success!")
         else:
-            print(f"Send test email: Failure ({response.status_code}, {response.body})")
+            # Log and raise an error with status code and body
+            error_msg = (
+                f"Send test email: Failure ({response.status_code})\n"
+                f"Response body: {response.body}"
+            )
+            print(error_msg)
+            # Raising this error will make the step fail in GitHub Actions
+            raise RuntimeError(error_msg)
 
         # Print additional response info (useful for debugging)
         print(f"Response Headers: {response.headers}")
-    
+
     except Exception as e:
+        # Log the exception
         print(f"An error occurred while sending email: {str(e)}")
+        # Raise the exception to fail the GitHub Actions job
+        raise
     else:
         print("No sendgrid api key found. Skipping email")
