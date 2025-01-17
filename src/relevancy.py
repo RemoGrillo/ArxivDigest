@@ -101,6 +101,7 @@ def generate_relevance_score(
     ans_data = []
     request_idx = 1
     hallucination = False
+    print(f"Papers:  {all_papers}")
     for id in tqdm.tqdm(range(0, len(all_papers), num_paper_in_prompt)):
         prompt_papers = all_papers[id:id+num_paper_in_prompt]
         # only sampling from the seed tasks

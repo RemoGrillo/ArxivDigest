@@ -244,6 +244,8 @@ def generate_body(topic, categories, interest, threshold):
     else:
         papers = get_papers(abbr)
     if interest:
+        print(f"Papers: {papers}")
+        print(f"Interest: {interest}")
         relevancy, hallucination = generate_relevance_score(
             papers,
             query={"interest": interest},
