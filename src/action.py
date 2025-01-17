@@ -293,6 +293,8 @@ if __name__ == "__main__":
     interest = config["interest"]
     body = generate_body(topic, categories, interest, threshold)
     with open("digest.html", "w") as f:
+        print("Writing body:")
+        print(body)
         f.write(body)
     if os.environ.get("SENDGRID_API_KEY", None):
         sg = SendGridAPIClient(api_key=os.environ.get("SENDGRID_API_KEY"))
