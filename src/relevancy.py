@@ -97,6 +97,7 @@ def generate_relevance_score(
     top_p=1.0,
     sorting=True
 ):
+    print("Generating relevance score...")
     ans_data = []
     request_idx = 1
     hallucination = False
@@ -112,6 +113,8 @@ def generate_relevance_score(
             top_p=top_p,
         )
         request_start = time.time()
+        print("Sending request to OpenAI:")
+        print(prompt)
         response = utils.openai_completion(
             prompts=prompt,
             model_name=model_name,
