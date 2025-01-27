@@ -3,7 +3,7 @@ topic: "Computer Science"
 # An empty list here will include all categories in a topic
 # Use the natural language names of the topics, found here: https://arxiv.org
 # Including more categories will result in more calls to the large language model
-categories: ["Artificial Intelligence", "Computation and Language", "Machine Learning", "Information Retrieval", "Logic in Computer Science", "Multiagent Systems", "Data Structures and Algorithms", "Databases", "Digital Libraries"]
+categories: ["Artificial Intelligence", "Computation and Language", "Machine Learning", "Information Retrieval", "Logic in Computer Science", "Multiagent Systems", "Databases", "Digital Libraries"]
 
 # Relevance score threshold. abstracts that receive a score less than this from the large language model
 # will have their papers filtered out.
@@ -22,7 +22,8 @@ threshold: 8
 # in whatever order arXiv responds with.
 interest: |
   Knowledge Graphs and LLMs.
-  Interested in Large Language Models (LLMs) and Knowledge Graphs (KG), especially in combination.
-  Text to Query, Natural language to query, especially SPARQL
-  Explanatory AI and Hybrid AI (only if in relation to Knowledge Graphs or symbolic reasoning (gofai))
-  RDF and LLMs
+  Interested in Large Language Models (LLMs) and Knowledge Graphs (KG) in combination.
+  Text to Query, Natural language to Query, especially SPARQL queries
+  Explanatory AI and Hybrid AI (ONLY if in relation to Knowledge Graphs)
+  RDF, LOD and LLMs.
+  If does NOT mention knowledge graph, the score CANNOT be 9 or more.
