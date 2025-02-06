@@ -2,6 +2,8 @@
 
 **ArXiv Digest and Personalized Recommendations using Large Language Models.**
 
+This is a customized fork for the [original repo of ArxivDigest.](https://github.com/AutoLLM/ArxivDigest).
+
 This repo aims to provide a better daily digest for newly published arXiv papers based on your own research interests and natural-language descriptions, using relevancy ratings from GPT.
 
 You can try it out on [Hugging Face](https://huggingface.co/spaces/AutoLLM/ArxivDigest) using your own OpenAI API key.
@@ -11,7 +13,7 @@ You can also create a daily subscription pipeline to email you the results.
 ## 📚 Contents
 
 - [What this repo does](#🔍-what-this-repo-does)
-  * [Examples](#some-examples)
+  * [Examples](#some-examples) 
 - [Usage](#💡-usage)
   * [Running as a github action using SendGrid (Recommended)](#running-as-a-github-action-using-sendgrid-recommended)
   * [Running as a github action with SMTP credentials](#running-as-a-github-action-with-smtp-credentials)
